@@ -15,7 +15,7 @@ from __future__ import print_function, absolute_import, division
 from import_cv2 import *
 
 # External modules
-import open3d
+# import open3d
 import numpy as np
 from pathlib import Path
 
@@ -48,6 +48,17 @@ def make_image_message(img, header, coding='bgr8'):
     msg = CV_BRIDGE.cv2_to_imgmsg(img, coding)
     msg.header = header
     return msg
+
+
+def message_to_cv2(msg, coding='bgr8'):
+    # Read image using CV bridge
+    try:
+        img = CV_BRIDGE.imgmsg_to_cv2(msg, coding)
+        return img
+    except CvBridgeError as e:
+        print(e)
+        rospy.logerr(e)
+        return None
 
 
 def open3d_to_numpy(pcd):

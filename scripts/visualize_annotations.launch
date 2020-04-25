@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+    <!-- Play rosbag record -->
+    <include file="play_rosbag.launch">
+        <arg name="filename" value="/home/heethesh/ROS-Workspaces/slam_ws/src/bags/cafe1-1_2-rosbag/uncompressed/cafe1-1-annotated.bag" />
+    </include>
+
+    <!-- Display raw images -->
+    <node
+        name="image_view_d400"
+        pkg="image_view"
+        type="image_view"
+        respawn="false"
+        output="screen">
+        <remap from="image" to="/d400/color/image_raw" />
+    </node>
+
+    <!-- Display aannotated images -->
+    <node
+        name="image_view_annotations"
+        pkg="image_view"
+        type="image_view"
+        respawn="false"
+        output="screen">
+        <remap from="image" to="/d400/annotation/dynamic_scores" />
+    </node>
+</launch>
