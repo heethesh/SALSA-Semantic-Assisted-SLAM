@@ -1,22 +1,22 @@
 /**
-* This file is part of ORB-SLAM2.
-*
-* Copyright (C) 2014-2016 Raúl Mur-Artal <raulmur at unizar dot es> (University of Zaragoza)
-* For more information see <https://github.com/raulmur/ORB_SLAM2>
-*
-* ORB-SLAM2 is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* ORB-SLAM2 is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with ORB-SLAM2. If not, see <http://www.gnu.org/licenses/>.
-*/
+ * This file is part of ORB-SLAM2.
+ *
+ * Copyright (C) 2014-2016 Raúl Mur-Artal <raulmur at unizar dot es> (University
+ * of Zaragoza) For more information see <https://github.com/raulmur/ORB_SLAM2>
+ *
+ * ORB-SLAM2 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * ORB-SLAM2 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with ORB-SLAM2. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #ifndef ORBSLAM2_ROS_NODE_H_
 #define ORBSLAM2_ROS_NODE_H_
@@ -44,57 +44,59 @@
 
 #include "System.h"
 
+class Node {
+ public:
+  Node(ORB_SLAM2::System::eSensor sensor, ros::NodeHandle &node_handle,
+       image_transport::ImageTransport &image_transport);
+  ~Node();
+  void Init();
 
+ protected:
+  void Update();
+  ORB_SLAM2::System *orb_slam_;
+  ros::Time current_frame_time_;
 
-class Node
-{
-  public:
-    Node (ORB_SLAM2::System::eSensor sensor, ros::NodeHandle &node_handle, image_transport::ImageTransport &image_transport);
-    ~Node ();
-    void Init ();
+  std::string camera_info_topic_;
 
-  protected:
-    void Update ();
-    ORB_SLAM2::System* orb_slam_;
-    ros::Time current_frame_time_;
+ private:
+  void PublishMapPoints(std::vector<ORB_SLAM2::MapPoint *> map_points);
+  void PublishPositionAsTransform(cv::Mat position);
+  void PublishPositionAsPoseStamped(cv::Mat position);
+  void PublishRenderedImage(cv::Mat image);
+  void ParamsChangedCallback(orb_slam2_ros::dynamic_reconfigureConfig &config,
+                             uint32_t level);
+  bool SaveMapSrv(orb_slam2_ros::SaveMap::Request &req,
+                  orb_slam2_ros::SaveMap::Response &res);
+  void LoadOrbParameters(ORB_SLAM2::ORBParameters &parameters);
 
-    std::string camera_info_topic_;
+  tf::Transform TransformFromMat(cv::Mat position_mat);
+  sensor_msgs::PointCloud2 MapPointsToPointCloud(
+      std::vector<ORB_SLAM2::MapPoint *> map_points);
 
-  private:
-    void PublishMapPoints (std::vector<ORB_SLAM2::MapPoint*> map_points);
-    void PublishPositionAsTransform (cv::Mat position);
-    void PublishPositionAsPoseStamped(cv::Mat position);
-    void PublishRenderedImage (cv::Mat image);
-    void ParamsChangedCallback(orb_slam2_ros::dynamic_reconfigureConfig &config, uint32_t level);
-    bool SaveMapSrv (orb_slam2_ros::SaveMap::Request &req, orb_slam2_ros::SaveMap::Response &res);
-    void LoadOrbParameters (ORB_SLAM2::ORBParameters& parameters);
+  dynamic_reconfigure::Server<orb_slam2_ros::dynamic_reconfigureConfig>
+      dynamic_param_server_;
 
-    tf::Transform TransformFromMat (cv::Mat position_mat);
-    sensor_msgs::PointCloud2 MapPointsToPointCloud (std::vector<ORB_SLAM2::MapPoint*> map_points);
+  image_transport::Publisher rendered_image_publisher_;
+  ros::Publisher map_points_publisher_;
+  ros::Publisher pose_publisher_;
 
-    dynamic_reconfigure::Server<orb_slam2_ros::dynamic_reconfigureConfig> dynamic_param_server_;
+  ros::ServiceServer service_server_;
 
-    image_transport::Publisher rendered_image_publisher_;
-    ros::Publisher map_points_publisher_;
-    ros::Publisher pose_publisher_;
+  std::string name_of_node_;
+  ros::NodeHandle node_handle_;
+  image_transport::ImageTransport image_transport_;
 
-    ros::ServiceServer service_server_;
+  ORB_SLAM2::System::eSensor sensor_;
 
-    std::string name_of_node_;
-    ros::NodeHandle node_handle_;
-    image_transport::ImageTransport image_transport_;
-
-    ORB_SLAM2::System::eSensor sensor_;
-
-    std::string map_frame_id_param_;
-    std::string camera_frame_id_param_;
-    std::string map_file_name_param_;
-    std::string voc_file_name_param_;
-    bool load_map_param_;
-    bool publish_pointcloud_param_;
-    bool publish_tf_param_;
-    bool publish_pose_param_;
-    int min_observations_per_point_;
+  std::string map_frame_id_param_;
+  std::string camera_frame_id_param_;
+  std::string map_file_name_param_;
+  std::string voc_file_name_param_;
+  bool load_map_param_;
+  bool publish_pointcloud_param_;
+  bool publish_tf_param_;
+  bool publish_pose_param_;
+  int min_observations_per_point_;
 };
 
-#endif //ORBSLAM2_ROS_NODE_H_
+#endif  // ORBSLAM2_ROS_NODE_H_
