@@ -22,7 +22,7 @@
 #include "Converter.h"
 #include "ORBmatcher.h"
 #include <thread>
-
+#define SALSA
 namespace ORB_SLAM2 {
 
 long unsigned int Frame::nNextId = 0;
@@ -171,7 +171,9 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
 
   UndistortKeyPoints();
 
-  ScoreKeyPoints(semanticmap);
+  #ifdef SALSA
+    ScoreKeyPoints(semanticmap);
+  #endif
 
   if(mvKeys.empty())
   {
@@ -422,6 +424,7 @@ bool Frame::PosInGrid(const cv::KeyPoint &kp, int &posX, int &posY) {
   return true;
 }
 
+//Computing BoW here
 void Frame::ComputeBoW() {
   if (mBowVec.empty()) {
     vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(mDescriptors);
@@ -466,7 +469,7 @@ void Frame::ScoreKeyPoints(const cv::Mat &semanticmap)
     for(int i=0; i<N; i++)
     {
         const cv::Point3_<uchar>* pixel = &semanticmap.at<cv::Point3_<uchar>>(cvRound(mvKeys[i].pt.y), cvRound(mvKeys[i].pt.x));
-        cerr << "BGR "<< int(pixel->x)<<":" << int(pixel->y)<<":" << int(pixel->z)<< endl;
+        // cerr << "BGR "<< int(pixel->x)<<":" << int(pixel->y)<<":" << int(pixel->z)<< endl;
         if(int(pixel->z) >250 )
         {
             mvKeysTemp.push_back(mvKeys[0]);
