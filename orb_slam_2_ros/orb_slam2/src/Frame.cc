@@ -22,6 +22,7 @@
 #include "Converter.h"
 #include "ORBmatcher.h"
 #include <thread>
+#define SALSA_BOW
 #define SALSA
 namespace ORB_SLAM2 {
 
@@ -451,7 +452,7 @@ void Frame::ComputeBoW() {
   if (mBowVec.empty()) {
     vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(mDescriptors);
   
-    #ifdef SALSA
+    #ifdef SALSA_BOW
     mpORBvocabulary->transform(vCurrentDesc, mBowVec, mFeatVec, 4, mvScoreDynamic, mvScoreRepeatable);
     #else
       mpORBvocabulary->transform(vCurrentDesc, mBowVec, mFeatVec, 4, mvScoreDynamic);
