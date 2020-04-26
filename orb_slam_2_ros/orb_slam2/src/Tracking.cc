@@ -213,6 +213,7 @@ cv::Mat Tracking::GrabImageMonocular(const cv::Mat& im,
                                      const double& timestamp, const cv::Mat &semanticmap) {
   mImGray = im;
   mIm_sem = semanticmap;
+  bool is_map_init = !((mState == NOT_INITIALIZED || mState == NO_IMAGES_YET));
   if (mImGray.channels() == 3) {
     if (mbRGB)
       cvtColor(mImGray, mImGray, CV_RGB2GRAY);
@@ -227,10 +228,10 @@ cv::Mat Tracking::GrabImageMonocular(const cv::Mat& im,
 
   if (mState == NOT_INITIALIZED || mState == NO_IMAGES_YET)
     mCurrentFrame = Frame(mImGray, timestamp, mpIniORBextractor,
-                          mpORBVocabulary, mK, mDistCoef, mbf, mThDepth, semanticmap);
+                          mpORBVocabulary, mK, mDistCoef, mbf, mThDepth, semanticmap, is_map_init);
   else
     mCurrentFrame = Frame(mImGray, timestamp, mpORBextractorLeft,
-                          mpORBVocabulary, mK, mDistCoef, mbf, mThDepth, semanticmap);
+                          mpORBVocabulary, mK, mDistCoef, mbf, mThDepth, semanticmap, is_map_init);
 
   Track();
 

@@ -80,7 +80,9 @@ KeyFrame::KeyFrame(Frame &F, Map *pMap, KeyFrameDatabase *pKFDB)
       mbToBeErased(false),
       mbBad(false),
       mHalfBaseline(F.mb / 2),
-      mpMap(pMap) {
+      mpMap(pMap),
+      mvScoreDynamic(F.mvScoreDynamic),
+      mvScoreRepeatable(F.mvScoreRepeatable) {
   mnId = nNextId++;
 
   mGrid.resize(mnGridCols);
