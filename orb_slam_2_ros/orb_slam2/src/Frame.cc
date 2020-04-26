@@ -22,7 +22,7 @@
 #include "Converter.h"
 #include "ORBmatcher.h"
 #include <thread>
-
+#define SALSA
 namespace ORB_SLAM2 {
 
 long unsigned int Frame::nNextId = 0;
@@ -64,7 +64,9 @@ Frame::Frame(const Frame &frame)
       mvScaleFactors(frame.mvScaleFactors),
       mvInvScaleFactors(frame.mvInvScaleFactors),
       mvLevelSigma2(frame.mvLevelSigma2),
-      mvInvLevelSigma2(frame.mvInvLevelSigma2) {
+      mvInvLevelSigma2(frame.mvInvLevelSigma2),
+      mvScoreDynamic(frame.mvScoreDynamic),
+      mvScoreRepeatable(frame.mvScoreRepeatable) {
   for (int i = 0; i < FRAME_GRID_COLS; i++)
     for (int j = 0; j < FRAME_GRID_ROWS; j++) mGrid[i][j] = frame.mGrid[i][j];
 
@@ -139,9 +141,9 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight,
 }
 
 Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
-             const double &timeStamp, ORBextractor *extractor,
-             ORBVocabulary *voc, cv::Mat &K, cv::Mat &distCoef, const float &bf,
-             const float &thDepth)
+             const double &timeStamp, ORBextractor* extractor,
+             ORBVocabulary* voc, cv::Mat &K, cv::Mat &distCoef, const float &bf,
+              const float &thDepth, const cv::Mat &semanticmap)
     : mpORBvocabulary(voc),
       mpORBextractorLeft(extractor),
       mpORBextractorRight(static_cast<ORBextractor *>(NULL)),
@@ -170,6 +172,16 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
   if (mvKeys.empty()) return;
 
   UndistortKeyPoints();
+
+  #ifdef SALSA
+    ScoreKeyPoints(semanticmap, false);
+  #endif
+
+  if(mvKeys.empty())
+  {
+    cerr << "Too many Keypoints Dynamic " << endl;
+    return;
+  }
 
   ComputeStereoFromRGBD(imDepth);
 
@@ -203,7 +215,8 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
 
 Frame::Frame(const cv::Mat &imGray, const double &timeStamp,
              ORBextractor *extractor, ORBVocabulary *voc, cv::Mat &K,
-             cv::Mat &distCoef, const float &bf, const float &thDepth)
+             cv::Mat &distCoef, const float &bf, const float &thDepth,
+             const cv::Mat &semanticmap, const bool enable_removal)
     : mpORBvocabulary(voc),
       mpORBextractorLeft(extractor),
       mpORBextractorRight(static_cast<ORBextractor *>(NULL)),
@@ -231,7 +244,26 @@ Frame::Frame(const cv::Mat &imGray, const double &timeStamp,
 
   if (mvKeys.empty()) return;
 
+  #ifdef SALSA
+    mvScoreDynamic.clear();
+    mvScoreRepeatable.clear();
+    ScoreKeyPoints(semanticmap, enable_removal);
+  #endif
+
   UndistortKeyPoints();
+
+
+  if((mvScoreRepeatable.size()==N) &&
+    (mvKeysUn.size()==N) && (mvKeys.size()==N) &&
+    (mvScoreDynamic.size()==N) && (mDescriptors.rows==N))
+  {
+    //   Do Nothing
+  }
+  else
+  {
+      cerr<<"Failed To Verify Sizes ";
+  }
+  
 
   // Set no stereo information
   mvuRight = vector<float>(N, -1);
@@ -414,6 +446,7 @@ bool Frame::PosInGrid(const cv::KeyPoint &kp, int &posX, int &posY) {
   return true;
 }
 
+//Computing BoW here
 void Frame::ComputeBoW() {
   if (mBowVec.empty()) {
     vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(mDescriptors);
@@ -448,6 +481,34 @@ void Frame::UndistortKeyPoints() {
     mvKeysUn[i] = kp;
   }
 }
+
+void Frame::ScoreKeyPoints(const cv::Mat &semanticmap, bool enable_removal)
+{
+    //Remove Dynamic KeyPoints
+    std::vector<cv::KeyPoint> vKeysTemp;
+    cv::Mat DescriptorsTemp;
+    int idx_key = 0;
+    for(int i=0; i<N; i++)
+    {
+        const cv::Point3_<uchar>* pixel = &semanticmap.at<cv::Point3_<uchar>>(cvRound(mvKeys[i].pt.y), cvRound(mvKeys[i].pt.x));
+        // cerr << "BGR "<< int(pixel->x)<<":" << int(pixel->y)<<":" << int(pixel->z)<< endl;
+        if(int(pixel->z) >250 && enable_removal)
+        {
+            continue;
+        }
+        vKeysTemp.push_back(mvKeys[i]);
+        mvScoreDynamic.push_back(float(pixel->y)/255.0);
+        mvScoreRepeatable.push_back(float(pixel->x)/255.0);
+        DescriptorsTemp.push_back(mDescriptors.row(i));
+    }
+    
+    mvKeys = vKeysTemp;
+    mDescriptors = DescriptorsTemp;
+    cerr << "UpdatedPoints "<< mvKeys.size()<<":" << N<<endl;
+    
+    N = mvKeys.size();
+}
+
 
 void Frame::ComputeImageBounds(const cv::Mat &imLeft) {
   if (mDistCoef.at<float>(0) != 0.0) {
