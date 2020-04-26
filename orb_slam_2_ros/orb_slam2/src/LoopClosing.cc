@@ -125,6 +125,7 @@ bool LoopClosing::DetectLoop() {
     if (pKF->isBad()) continue;
     const DBoW2::BowVector& BowVec = pKF->mBowVec;
 
+    //Add a factor here where score depends on Ratio of Good/Bad Features
     float score = mpORBVocabulary->score(CurrentBowVec, BowVec);
 
     if (score < minScore) minScore = score;

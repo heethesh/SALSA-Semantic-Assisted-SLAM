@@ -139,9 +139,9 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight,
 }
 
 Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
-             const double &timeStamp, ORBextractor *extractor,
-             ORBVocabulary *voc, cv::Mat &K, cv::Mat &distCoef, const float &bf,
-             const float &thDepth)
+             const double &timeStamp, ORBextractor* extractor,
+             ORBVocabulary* voc, cv::Mat &K, cv::Mat &distCoef, const float &bf,
+              const float &thDepth, const cv::Mat &semanticmap)
     : mpORBvocabulary(voc),
       mpORBextractorLeft(extractor),
       mpORBextractorRight(static_cast<ORBextractor *>(NULL)),
@@ -170,6 +170,14 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
   if (mvKeys.empty()) return;
 
   UndistortKeyPoints();
+
+  ScoreKeyPoints(semanticmap);
+
+  if(mvKeys.empty())
+  {
+    cerr << "Too many Keypoints Dynamic " << endl;
+    return;
+  }
 
   ComputeStereoFromRGBD(imDepth);
 
@@ -448,6 +456,46 @@ void Frame::UndistortKeyPoints() {
     mvKeysUn[i] = kp;
   }
 }
+
+void Frame::ScoreKeyPoints(const cv::Mat &semanticmap)
+{
+    //Remove Dynamic KeyPoints
+    std::vector<cv::KeyPoint> mvKeysTemp;
+
+    int idx_key = 0;
+    for(int i=0; i<N; i++)
+    {
+        const cv::Point3_<uchar>* pixel = &semanticmap.at<cv::Point3_<uchar>>(cvRound(mvKeys[i].pt.y), cvRound(mvKeys[i].pt.x));
+        cerr << "BGR "<< int(pixel->x)<<":" << int(pixel->y)<<":" << int(pixel->z)<< endl;
+        if(int(pixel->z) >250 )
+        {
+            mvKeysTemp.push_back(mvKeys[0]);
+            mvScoreDynamic.push_back(0);
+            mvScoreRepeatable.push_back(0);
+            continue;
+        }
+        mvKeysTemp.push_back(mvKeys[i]);
+        mvScoreDynamic.push_back(float(pixel->y)/255.0);
+        mvScoreRepeatable.push_back(float(pixel->x)/255.0);
+    }
+
+    mvKeys = mvKeysTemp;
+
+    cerr << "UpdatedPoints "<< mvKeysTemp.size()<<":" << N<<endl;
+    
+    N = mvKeysTemp.size();
+
+    // mvKeysUn.resize(N);
+    // for(int i=0; i<N; i++)
+    // {
+         
+    //     cv::KeyPoint kp = mvKeys[i];
+    //     kp.pt.x=mat.at<float>(i,0);
+    //     kp.pt.y=mat.at<float>(i,1);
+    //     mvKeysUn[i]=kp;
+    // }
+}
+
 
 void Frame::ComputeImageBounds(const cv::Mat &imLeft) {
   if (mDistCoef.at<float>(0) != 0.0) {

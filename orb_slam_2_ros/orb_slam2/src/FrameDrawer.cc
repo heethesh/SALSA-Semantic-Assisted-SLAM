@@ -35,6 +35,7 @@ FrameDrawer::FrameDrawer(Map *pMap) : mpMap(pMap) {
 
 cv::Mat FrameDrawer::DrawFrame() {
   cv::Mat im;
+  cv::Mat sem;
   vector<cv::KeyPoint>
       vIniKeys;  // Initialization: KeyPoints in reference frame
   vector<int>
@@ -50,7 +51,7 @@ cv::Mat FrameDrawer::DrawFrame() {
     if (mState == Tracking::SYSTEM_NOT_READY) mState = Tracking::NO_IMAGES_YET;
 
     mIm.copyTo(im);
-
+    mIm_sem.copyTo(sem);
     if (mState == Tracking::NOT_INITIALIZED) {
       vCurrentKeys = mvCurrentKeys;
       vIniKeys = mvIniKeys;
@@ -82,8 +83,18 @@ cv::Mat FrameDrawer::DrawFrame() {
     mnTrackedVO = 0;
     const float r = 5;
     const int n = vCurrentKeys.size();
+
+    //OverLay the Semantic Map Here
+    if(im.channels()==1)
+    {
+        cv::cvtColor(im,im,CV_GRAY2RGB);
+    }
+    float alpha = 0.15;
+    cv::addWeighted( sem, alpha, im, (1.0-alpha), 0.0, im);
+    
     for (int i = 0; i < n; i++) {
       if (vbVO[i] || vbMap[i]) {
+        const cv::Point3_<uchar>* pixel = &sem.at<cv::Point3_<uchar>>(cvRound(vCurrentKeys[i].pt.y), cvRound(vCurrentKeys[i].pt.x));
         cv::Point2f pt1, pt2;
         pt1.x = vCurrentKeys[i].pt.x - r;
         pt1.y = vCurrentKeys[i].pt.y - r;
@@ -92,8 +103,15 @@ cv::Mat FrameDrawer::DrawFrame() {
 
         // This is a match to a MapPoint in the map
         if (vbMap[i]) {
-          cv::rectangle(im, pt1, pt2, cv::Scalar(0, 255, 0));
-          cv::circle(im, vCurrentKeys[i].pt, 2, cv::Scalar(0, 255, 0), -1);
+
+          int B_ = int(pixel->x);
+          int G_ = int(pixel->y);
+          int R_ = 0;
+          if(B_ + G_ < 10){
+              R_ = 255;
+          }
+          cv::rectangle(im, pt1, pt2, cv::Scalar(B_, G_, R_));
+          cv::circle(im, vCurrentKeys[i].pt, 2, cv::Scalar(B_, G_, R_), -1);
           mnTracked++;
         } else  // This is match to a "visual odometry" MapPoint created in the
                 // last frame
@@ -148,6 +166,7 @@ void FrameDrawer::DrawTextInfo(cv::Mat &im, int nState, cv::Mat &imText) {
 void FrameDrawer::Update(Tracking *pTracker) {
   unique_lock<mutex> lock(mMutex);
   pTracker->mImGray.copyTo(mIm);
+  pTracker->mIm_sem.copyTo(mIm_sem);
   mvCurrentKeys = pTracker->mCurrentFrame.mvKeys;
   N = mvCurrentKeys.size();
   mvbVO = vector<bool>(N, false);

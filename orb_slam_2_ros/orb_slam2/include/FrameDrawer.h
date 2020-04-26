@@ -49,6 +49,7 @@ class FrameDrawer {
 
   // Info of the frame to be drawn
   cv::Mat mIm;
+  cv::Mat mIm_sem;
   int N;
   vector<cv::KeyPoint> mvCurrentKeys;
   vector<bool> mvbMap, mvbVO;

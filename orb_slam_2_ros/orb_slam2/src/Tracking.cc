@@ -180,9 +180,10 @@ cv::Mat Tracking::GrabImageStereo(const cv::Mat& imRectLeft,
   return mCurrentFrame.mTcw.clone();
 }
 
-cv::Mat Tracking::GrabImageRGBD(const cv::Mat& imRGB, const cv::Mat& imD,
-                                const double& timestamp) {
+cv::Mat Tracking::GrabImageRGBD(const cv::Mat &imRGB, const cv::Mat &imD, 
+                                const double &timestamp, const cv::Mat &semanticmap){
   mImGray = imRGB;
+  mIm_sem = semanticmap;
   cv::Mat imDepth = imD;
 
   if (mImGray.channels() == 3) {
@@ -200,8 +201,8 @@ cv::Mat Tracking::GrabImageRGBD(const cv::Mat& imRGB, const cv::Mat& imD,
   if ((fabs(mDepthMapFactor - 1.0f) > 1e-5) || imDepth.type() != CV_32F)
     imDepth.convertTo(imDepth, CV_32F, mDepthMapFactor);
 
-  mCurrentFrame = Frame(mImGray, imDepth, timestamp, mpORBextractorLeft,
-                        mpORBVocabulary, mK, mDistCoef, mbf, mThDepth);
+  mCurrentFrame = Frame(mImGray, imDepth, timestamp, mpORBextractorLeft, 
+                        mpORBVocabulary,mK,mDistCoef,mbf,mThDepth, semanticmap);
 
   Track();
 
@@ -815,6 +816,7 @@ bool Tracking::TrackWithMotionModel() {
   return nmatchesMap >= 10;
 }
 
+//Front end biasing here
 bool Tracking::TrackLocalMap() {
   // We have an estimation of the camera pose and some map points tracked in the
   // frame. We retrieve the local map and try to find matches to points in the
