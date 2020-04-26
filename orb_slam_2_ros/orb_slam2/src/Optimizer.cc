@@ -36,6 +36,18 @@
 
 namespace ORB_SLAM2 {
 
+namespace {
+
+const float kWeightDynamic = 0.5f;
+const float kWeightRepeatable = 1.f - kWeightDynamic;
+
+inline float computeHeuristicScore(const float& dynamic,
+                                   const float& repeatable) {
+  return kWeightDynamic * dynamic + kWeightRepeatable * repeatable;
+}
+
+}  // namespace
+
 void Optimizer::GlobalBundleAdjustemnt(Map* pMap, int nIterations,
                                        bool* pbStopFlag,
                                        const unsigned long nLoopKF,
@@ -111,6 +123,11 @@ void Optimizer::BundleAdjustment(const vector<KeyFrame*>& vpKFs,
         Eigen::Matrix<double, 2, 1> obs;
         obs << kpUn.pt.x, kpUn.pt.y;
 
+        // Heuristic score
+        const float& heuristicScore =
+            computeHeuristicScore(pKF->mvScoreDynamic[mit->second],
+                                  pKF->mvScoreRepeatable[mit->second]);
+
         g2o::EdgeSE3ProjectXYZ* e = new g2o::EdgeSE3ProjectXYZ();
 
         e->setVertex(0, dynamic_cast<g2o::OptimizableGraph::Vertex*>(
@@ -119,7 +136,8 @@ void Optimizer::BundleAdjustment(const vector<KeyFrame*>& vpKFs,
                             optimizer.vertex(pKF->mnId)));
         e->setMeasurement(obs);
         const float& invSigma2 = pKF->mvInvLevelSigma2[kpUn.octave];
-        e->setInformation(Eigen::Matrix2d::Identity() * invSigma2);
+        e->setInformation(Eigen::Matrix2d::Identity() * invSigma2 *
+                          heuristicScore);
 
         if (bRobust) {
           g2o::RobustKernelHuber* rk = new g2o::RobustKernelHuber;
@@ -138,6 +156,11 @@ void Optimizer::BundleAdjustment(const vector<KeyFrame*>& vpKFs,
         const float kp_ur = pKF->mvuRight[mit->second];
         obs << kpUn.pt.x, kpUn.pt.y, kp_ur;
 
+        // Heuristic score
+        const float& heuristicScore =
+            computeHeuristicScore(pKF->mvScoreDynamic[mit->second],
+                                  pKF->mvScoreRepeatable[mit->second]);
+
         g2o::EdgeStereoSE3ProjectXYZ* e = new g2o::EdgeStereoSE3ProjectXYZ();
 
         e->setVertex(0, dynamic_cast<g2o::OptimizableGraph::Vertex*>(
@@ -146,7 +169,8 @@ void Optimizer::BundleAdjustment(const vector<KeyFrame*>& vpKFs,
                             optimizer.vertex(pKF->mnId)));
         e->setMeasurement(obs);
         const float& invSigma2 = pKF->mvInvLevelSigma2[kpUn.octave];
-        Eigen::Matrix3d Info = Eigen::Matrix3d::Identity() * invSigma2;
+        Eigen::Matrix3d Info =
+            Eigen::Matrix3d::Identity() * invSigma2 * heuristicScore;
         e->setInformation(Info);
 
         if (bRobust) {
@@ -269,6 +293,10 @@ int Optimizer::PoseOptimization(Frame* pFrame) {
           const cv::KeyPoint& kpUn = pFrame->mvKeysUn[i];
           obs << kpUn.pt.x, kpUn.pt.y;
 
+          // Heuristic score
+          const float& heuristicScore = computeHeuristicScore(
+              pFrame->mvScoreDynamic[i], pFrame->mvScoreRepeatable[i]);
+
           g2o::EdgeSE3ProjectXYZOnlyPose* e =
               new g2o::EdgeSE3ProjectXYZOnlyPose();
 
@@ -276,7 +304,8 @@ int Optimizer::PoseOptimization(Frame* pFrame) {
                               optimizer.vertex(0)));
           e->setMeasurement(obs);
           const float invSigma2 = pFrame->mvInvLevelSigma2[kpUn.octave];
-          e->setInformation(Eigen::Matrix2d::Identity() * invSigma2);
+          e->setInformation(Eigen::Matrix2d::Identity() * invSigma2 *
+                            heuristicScore);
 
           g2o::RobustKernelHuber* rk = new g2o::RobustKernelHuber;
           e->setRobustKernel(rk);
@@ -306,6 +335,10 @@ int Optimizer::PoseOptimization(Frame* pFrame) {
           const float& kp_ur = pFrame->mvuRight[i];
           obs << kpUn.pt.x, kpUn.pt.y, kp_ur;
 
+          // Heuristic score
+          const float& heuristicScore = computeHeuristicScore(
+              pFrame->mvScoreDynamic[i], pFrame->mvScoreRepeatable[i]);
+
           g2o::EdgeStereoSE3ProjectXYZOnlyPose* e =
               new g2o::EdgeStereoSE3ProjectXYZOnlyPose();
 
@@ -313,7 +346,8 @@ int Optimizer::PoseOptimization(Frame* pFrame) {
                               optimizer.vertex(0)));
           e->setMeasurement(obs);
           const float invSigma2 = pFrame->mvInvLevelSigma2[kpUn.octave];
-          Eigen::Matrix3d Info = Eigen::Matrix3d::Identity() * invSigma2;
+          Eigen::Matrix3d Info =
+              Eigen::Matrix3d::Identity() * invSigma2 * heuristicScore;
           e->setInformation(Info);
 
           g2o::RobustKernelHuber* rk = new g2o::RobustKernelHuber;
@@ -562,6 +596,11 @@ void Optimizer::LocalBundleAdjustment(KeyFrame* pKF, bool* pbStopFlag,
           Eigen::Matrix<double, 2, 1> obs;
           obs << kpUn.pt.x, kpUn.pt.y;
 
+          // Heuristic score
+          const float& heuristicScore =
+              computeHeuristicScore(pKFi->mvScoreDynamic[mit->second],
+                                    pKFi->mvScoreRepeatable[mit->second]);
+
           g2o::EdgeSE3ProjectXYZ* e = new g2o::EdgeSE3ProjectXYZ();
 
           e->setVertex(0, dynamic_cast<g2o::OptimizableGraph::Vertex*>(
@@ -570,7 +609,8 @@ void Optimizer::LocalBundleAdjustment(KeyFrame* pKF, bool* pbStopFlag,
                               optimizer.vertex(pKFi->mnId)));
           e->setMeasurement(obs);
           const float& invSigma2 = pKFi->mvInvLevelSigma2[kpUn.octave];
-          e->setInformation(Eigen::Matrix2d::Identity() * invSigma2);
+          e->setInformation(Eigen::Matrix2d::Identity() * invSigma2 *
+                            heuristicScore);
 
           g2o::RobustKernelHuber* rk = new g2o::RobustKernelHuber;
           e->setRobustKernel(rk);
@@ -591,6 +631,11 @@ void Optimizer::LocalBundleAdjustment(KeyFrame* pKF, bool* pbStopFlag,
           const float kp_ur = pKFi->mvuRight[mit->second];
           obs << kpUn.pt.x, kpUn.pt.y, kp_ur;
 
+          // Heuristic score
+          const float& heuristicScore =
+              computeHeuristicScore(pKFi->mvScoreDynamic[mit->second],
+                                    pKFi->mvScoreRepeatable[mit->second]);
+
           g2o::EdgeStereoSE3ProjectXYZ* e = new g2o::EdgeStereoSE3ProjectXYZ();
 
           e->setVertex(0, dynamic_cast<g2o::OptimizableGraph::Vertex*>(
@@ -599,7 +644,8 @@ void Optimizer::LocalBundleAdjustment(KeyFrame* pKF, bool* pbStopFlag,
                               optimizer.vertex(pKFi->mnId)));
           e->setMeasurement(obs);
           const float& invSigma2 = pKFi->mvInvLevelSigma2[kpUn.octave];
-          Eigen::Matrix3d Info = Eigen::Matrix3d::Identity() * invSigma2;
+          Eigen::Matrix3d Info =
+              Eigen::Matrix3d::Identity() * invSigma2 * heuristicScore;
           e->setInformation(Info);
 
           g2o::RobustKernelHuber* rk = new g2o::RobustKernelHuber;
@@ -1102,6 +1148,10 @@ int Optimizer::OptimizeSim3(KeyFrame* pKF1, KeyFrame* pKF2,
     const cv::KeyPoint& kpUn1 = pKF1->mvKeysUn[i];
     obs1 << kpUn1.pt.x, kpUn1.pt.y;
 
+    // Heuristic score for KF1
+    const float& heuristicScore1 = computeHeuristicScore(
+        pKF1->mvScoreDynamic[i], pKF1->mvScoreRepeatable[i]);
+
     g2o::EdgeSim3ProjectXYZ* e12 = new g2o::EdgeSim3ProjectXYZ();
     e12->setVertex(
         0, dynamic_cast<g2o::OptimizableGraph::Vertex*>(optimizer.vertex(id2)));
@@ -1109,7 +1159,8 @@ int Optimizer::OptimizeSim3(KeyFrame* pKF1, KeyFrame* pKF2,
         1, dynamic_cast<g2o::OptimizableGraph::Vertex*>(optimizer.vertex(0)));
     e12->setMeasurement(obs1);
     const float& invSigmaSquare1 = pKF1->mvInvLevelSigma2[kpUn1.octave];
-    e12->setInformation(Eigen::Matrix2d::Identity() * invSigmaSquare1);
+    e12->setInformation(Eigen::Matrix2d::Identity() * invSigmaSquare1 *
+                        heuristicScore1);
 
     g2o::RobustKernelHuber* rk1 = new g2o::RobustKernelHuber;
     e12->setRobustKernel(rk1);
@@ -1121,6 +1172,10 @@ int Optimizer::OptimizeSim3(KeyFrame* pKF1, KeyFrame* pKF2,
     const cv::KeyPoint& kpUn2 = pKF2->mvKeysUn[i2];
     obs2 << kpUn2.pt.x, kpUn2.pt.y;
 
+    // Heuristic score for KF2
+    const float& heuristicScore2 = computeHeuristicScore(
+        pKF2->mvScoreDynamic[i2], pKF2->mvScoreRepeatable[i2]);
+
     g2o::EdgeInverseSim3ProjectXYZ* e21 = new g2o::EdgeInverseSim3ProjectXYZ();
 
     e21->setVertex(
@@ -1129,7 +1184,8 @@ int Optimizer::OptimizeSim3(KeyFrame* pKF1, KeyFrame* pKF2,
         1, dynamic_cast<g2o::OptimizableGraph::Vertex*>(optimizer.vertex(0)));
     e21->setMeasurement(obs2);
     float invSigmaSquare2 = pKF2->mvInvLevelSigma2[kpUn2.octave];
-    e21->setInformation(Eigen::Matrix2d::Identity() * invSigmaSquare2);
+    e21->setInformation(Eigen::Matrix2d::Identity() * invSigmaSquare2 *
+                        heuristicScore2);
 
     g2o::RobustKernelHuber* rk2 = new g2o::RobustKernelHuber;
     e21->setRobustKernel(rk2);
