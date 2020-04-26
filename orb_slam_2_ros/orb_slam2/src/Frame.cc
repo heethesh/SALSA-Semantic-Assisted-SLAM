@@ -471,18 +471,12 @@ void Frame::ScoreKeyPoints(const cv::Mat &semanticmap, bool enable_removal)
     std::vector<cv::KeyPoint> vKeysTemp;
     cv::Mat DescriptorsTemp;
     int idx_key = 0;
-    int enable = 1;
     for(int i=0; i<N; i++)
     {
         const cv::Point3_<uchar>* pixel = &semanticmap.at<cv::Point3_<uchar>>(cvRound(mvKeys[i].pt.y), cvRound(mvKeys[i].pt.x));
         // cerr << "BGR "<< int(pixel->x)<<":" << int(pixel->y)<<":" << int(pixel->z)<< endl;
         if(int(pixel->z) >250 && enable_removal)
         {
-            //  skip += 1;
-            // vKeysTemp.push_back(mvKeys[0]);
-            // mvScoreDynamic.push_back(0);
-            // mvScoreRepeatable.push_back(0);
-            // DescriptorsTemp.push_back(mDescriptors.row(0));
             continue;
         }
         vKeysTemp.push_back(mvKeys[i]);
