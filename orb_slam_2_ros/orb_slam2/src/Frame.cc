@@ -64,7 +64,9 @@ Frame::Frame(const Frame &frame)
       mvScaleFactors(frame.mvScaleFactors),
       mvInvScaleFactors(frame.mvInvScaleFactors),
       mvLevelSigma2(frame.mvLevelSigma2),
-      mvInvLevelSigma2(frame.mvInvLevelSigma2) {
+      mvInvLevelSigma2(frame.mvInvLevelSigma2),
+      mvScoreDynamic(frame.mvScoreDynamic),
+      mvScoreRepeatable(frame.mvScoreRepeatable) {
   for (int i = 0; i < FRAME_GRID_COLS; i++)
     for (int j = 0; j < FRAME_GRID_ROWS; j++) mGrid[i][j] = frame.mGrid[i][j];
 
@@ -214,7 +216,7 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
 Frame::Frame(const cv::Mat &imGray, const double &timeStamp,
              ORBextractor *extractor, ORBVocabulary *voc, cv::Mat &K,
              cv::Mat &distCoef, const float &bf, const float &thDepth,
-             const cv::Mat &semanticmap)
+             const cv::Mat &semanticmap, const bool enable_removal)
     : mpORBvocabulary(voc),
       mpORBextractorLeft(extractor),
       mpORBextractorRight(static_cast<ORBextractor *>(NULL)),
@@ -243,10 +245,25 @@ Frame::Frame(const cv::Mat &imGray, const double &timeStamp,
   if (mvKeys.empty()) return;
 
   #ifdef SALSA
-    ScoreKeyPoints(semanticmap, true);
+    mvScoreDynamic.clear();
+    mvScoreRepeatable.clear();
+    ScoreKeyPoints(semanticmap, enable_removal);
   #endif
 
   UndistortKeyPoints();
+
+
+  if((mvScoreRepeatable.size()==N) &&
+    (mvKeysUn.size()==N) && (mvKeys.size()==N) &&
+    (mvScoreDynamic.size()==N) && (mDescriptors.rows==N))
+  {
+    //   Do Nothing
+  }
+  else
+  {
+      cerr<<"Failed To Verify Sizes ";
+  }
+  
 
   // Set no stereo information
   mvuRight = vector<float>(N, -1);
