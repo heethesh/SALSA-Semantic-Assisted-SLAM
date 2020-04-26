@@ -108,6 +108,7 @@ cv::Mat FrameDrawer::DrawFrame() {
           int G_ = int(pixel->y);
           int R_ = 0;
           if(B_ + G_ < 10){
+              G_ = 255;
               R_ = 255;
           }
           cv::rectangle(im, pt1, pt2, cv::Scalar(B_, G_, R_));
