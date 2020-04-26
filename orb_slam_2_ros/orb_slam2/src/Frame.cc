@@ -172,7 +172,7 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
   UndistortKeyPoints();
 
   #ifdef SALSA
-    ScoreKeyPoints(semanticmap);
+    ScoreKeyPoints(semanticmap, false);
   #endif
 
   if(mvKeys.empty())
@@ -213,7 +213,8 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
 
 Frame::Frame(const cv::Mat &imGray, const double &timeStamp,
              ORBextractor *extractor, ORBVocabulary *voc, cv::Mat &K,
-             cv::Mat &distCoef, const float &bf, const float &thDepth)
+             cv::Mat &distCoef, const float &bf, const float &thDepth,
+             const cv::Mat &semanticmap)
     : mpORBvocabulary(voc),
       mpORBextractorLeft(extractor),
       mpORBextractorRight(static_cast<ORBextractor *>(NULL)),
@@ -240,6 +241,10 @@ Frame::Frame(const cv::Mat &imGray, const double &timeStamp,
   N = mvKeys.size();
 
   if (mvKeys.empty()) return;
+
+  #ifdef SALSA
+    ScoreKeyPoints(semanticmap, true);
+  #endif
 
   UndistortKeyPoints();
 
@@ -460,30 +465,34 @@ void Frame::UndistortKeyPoints() {
   }
 }
 
-void Frame::ScoreKeyPoints(const cv::Mat &semanticmap)
+void Frame::ScoreKeyPoints(const cv::Mat &semanticmap, bool enable_removal)
 {
     //Remove Dynamic KeyPoints
     std::vector<cv::KeyPoint> mvKeysTemp;
-
+    cv::Mat mDescriptorsTemp;
     int idx_key = 0;
+    int enable = 1;
     for(int i=0; i<N; i++)
     {
         const cv::Point3_<uchar>* pixel = &semanticmap.at<cv::Point3_<uchar>>(cvRound(mvKeys[i].pt.y), cvRound(mvKeys[i].pt.x));
         // cerr << "BGR "<< int(pixel->x)<<":" << int(pixel->y)<<":" << int(pixel->z)<< endl;
-        if(int(pixel->z) >250 )
+        if(int(pixel->z) >250 && enable_removal)
         {
-            mvKeysTemp.push_back(mvKeys[0]);
-            mvScoreDynamic.push_back(0);
-            mvScoreRepeatable.push_back(0);
+            //  skip += 1;
+            // mvKeysTemp.push_back(mvKeys[0]);
+            // mvScoreDynamic.push_back(0);
+            // mvScoreRepeatable.push_back(0);
+            // mDescriptorsTemp.push_back(mDescriptors.row(0));
             continue;
         }
         mvKeysTemp.push_back(mvKeys[i]);
         mvScoreDynamic.push_back(float(pixel->y)/255.0);
         mvScoreRepeatable.push_back(float(pixel->x)/255.0);
+        mDescriptorsTemp.push_back(mDescriptors.row(i));
     }
-
+    
     mvKeys = mvKeysTemp;
-
+    mDescriptors = mDescriptorsTemp;
     cerr << "UpdatedPoints "<< mvKeysTemp.size()<<":" << N<<endl;
     
     N = mvKeysTemp.size();

@@ -210,9 +210,9 @@ cv::Mat Tracking::GrabImageRGBD(const cv::Mat &imRGB, const cv::Mat &imD,
 }
 
 cv::Mat Tracking::GrabImageMonocular(const cv::Mat& im,
-                                     const double& timestamp) {
+                                     const double& timestamp, const cv::Mat &semanticmap) {
   mImGray = im;
-
+  mIm_sem = semanticmap;
   if (mImGray.channels() == 3) {
     if (mbRGB)
       cvtColor(mImGray, mImGray, CV_RGB2GRAY);
@@ -227,10 +227,10 @@ cv::Mat Tracking::GrabImageMonocular(const cv::Mat& im,
 
   if (mState == NOT_INITIALIZED || mState == NO_IMAGES_YET)
     mCurrentFrame = Frame(mImGray, timestamp, mpIniORBextractor,
-                          mpORBVocabulary, mK, mDistCoef, mbf, mThDepth);
+                          mpORBVocabulary, mK, mDistCoef, mbf, mThDepth, semanticmap);
   else
     mCurrentFrame = Frame(mImGray, timestamp, mpORBextractorLeft,
-                          mpORBVocabulary, mK, mDistCoef, mbf, mThDepth);
+                          mpORBVocabulary, mK, mDistCoef, mbf, mThDepth, semanticmap);
 
   Track();
 
@@ -259,7 +259,6 @@ void Tracking::Track() {
   } else {
     // System is initialized. Track Frame.
     bool bOK;
-
     // Initial camera pose estimation using motion model or relocalization (if
     // tracking is lost)
     if (!mbOnlyTracking) {
@@ -271,12 +270,15 @@ void Tracking::Track() {
         CheckReplacedInLastFrame();
 
         if (mVelocity.empty() || mCurrentFrame.mnId < mnLastRelocFrameId + 2) {
+            // cerr<<"H1";
           bOK = TrackReferenceKeyFrame();
         } else {
+            // cerr<<"H2";
           bOK = TrackWithMotionModel();
           if (!bOK) bOK = TrackReferenceKeyFrame();
         }
       } else {
+        //   cerr<<"H3";
         bOK = Relocalization();
       }
     } else {
@@ -341,6 +343,7 @@ void Tracking::Track() {
     // the local map.
     if (!mbOnlyTracking) {
       if (bOK) bOK = TrackLocalMap();
+    //   cerr<<"Bok:"<<bOK<<endl;
     } else {
       // mbVO true means that there are few matches to MapPoints in the map. We
       // cannot retrieve a local map and therefore we do not perform
@@ -845,13 +848,14 @@ bool Tracking::TrackLocalMap() {
     }
   }
 
+    // cerr<<"Inlier :"<<mnMatchesInliers<<endl;
   // Decide if the tracking was succesful
   // More restrictive if there was a relocalization recently
   if (mCurrentFrame.mnId < mnLastRelocFrameId + mMaxFrames &&
-      mnMatchesInliers < 50)
+      mnMatchesInliers < 30)
     return false;
 
-  if (mnMatchesInliers < 30)
+  if (mnMatchesInliers < 10)
     return false;
   else
     return true;

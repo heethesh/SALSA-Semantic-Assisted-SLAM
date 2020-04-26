@@ -71,7 +71,8 @@ class Tracking {
                           const double& timestamp);
   cv::Mat GrabImageRGBD(const cv::Mat &imRGB,const cv::Mat &imD,
                          const double &timestamp, const cv::Mat &semanticmap);
-  cv::Mat GrabImageMonocular(const cv::Mat& im, const double& timestamp);
+  cv::Mat GrabImageMonocular(const cv::Mat& im, const double& timestamp,
+                             const cv::Mat &semanticmap);
 
   void SetLocalMapper(LocalMapping* pLocalMapper);
   void SetLoopClosing(LoopClosing* pLoopClosing);

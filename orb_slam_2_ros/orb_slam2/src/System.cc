@@ -225,7 +225,8 @@ void System::TrackRGBD(const cv::Mat &im, const cv::Mat &depthmap,
   current_position_ = Tcw;
 }
 
-void System::TrackMonocular(const cv::Mat &im, const double &timestamp) {
+void System::TrackMonocular(const cv::Mat &im, const double &timestamp,
+                            const cv::Mat &semanticmap ) {
   if (mSensor != MONOCULAR) {
     cerr << "ERROR: you called TrackMonocular but input sensor was not set to "
             "Monocular."
@@ -263,7 +264,7 @@ void System::TrackMonocular(const cv::Mat &im, const double &timestamp) {
     }
   }
 
-  cv::Mat Tcw = mpTracker->GrabImageMonocular(im, timestamp);
+  cv::Mat Tcw = mpTracker->GrabImageMonocular(im, timestamp, semanticmap);
 
   unique_lock<mutex> lock2(mMutexState);
   mTrackingState = mpTracker->mState;
