@@ -37,6 +37,11 @@
 
 using namespace std;
 
+namespace {
+  constexpr float rrThresh = 0.7f;
+  constexpr float repeatThresh = 0.7f;
+  constexpr float dynamicThresh = 0.7f;
+}
 
 namespace DBoW2 {
 
@@ -1273,9 +1278,9 @@ void TemplatedVocabulary<TDescriptor,F>::transform(
       NodeId nid;
       WordValue w;
       // w is the idf value if TF_IDF, 1 if TF
-      cout << "mvScoreRepeatable[i_feature] " << mvScoreRepeatable[i_feature] << " mvScoreDynamic[i_feature] " << mvScoreDynamic[i_feature] << endl; 
-      if ( (mvScoreRepeatable[i_feature] > 0.7f &&  mvScoreDynamic[i_feature] > 0.7f) 
-        && ((float)rand()/RAND_MAX) > 0.7f)
+      // cout << "mvScoreRepeatable[i_feature] " << mvScoreRepeatable[i_feature] << " mvScoreDynamic[i_feature] " << mvScoreDynamic[i_feature] << endl; 
+      if ( (mvScoreRepeatable[i_feature] > repeatThresh &&  mvScoreDynamic[i_feature] > dynamicThresh) 
+        && ((float)rand()/RAND_MAX) > rrThresh)
       {
         i++;
         continue;
