@@ -152,7 +152,6 @@ class Frame {
   // Dynamic scores (range: 0 - 1)
   // 0 means no chance of dynamic/repeatable (static objects)
   // 1 means higher chance of dynamic/repeatable
-  // TODO(ayush): move these members to protected block if not thread-safe
   std::vector<float> mvScoreDynamic;
   std::vector<float> mvScoreRepeatable;
 

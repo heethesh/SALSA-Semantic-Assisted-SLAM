@@ -103,8 +103,8 @@ System::System(const string strVocFile, const eSensor sensor,
   mpFrameDrawer = new FrameDrawer(mpMap);
 
   // Initialize the Tracking thread
-  //(it will live in the main thread of execution, the one that called this
-  //constructor)
+  // (it will live in the main thread of execution, the one that called this
+  // constructor)
   mpTracker = new Tracking(this, mpVocabulary, mpFrameDrawer, mpMap,
                            mpKeyFrameDatabase, mSensor, parameters);
 
