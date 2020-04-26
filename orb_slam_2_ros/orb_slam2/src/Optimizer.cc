@@ -38,12 +38,14 @@ namespace ORB_SLAM2 {
 
 namespace {
 
+constexpr bool kEnableHeuristics = false;
 constexpr float kWeightDynamic = 0.5f;
 constexpr float kWeightRepeatable = 1.f - kWeightDynamic;
 constexpr float kHeuristicImportanceFactor = 1.f;
 
 inline float computeHeuristicScore(const float& dynamic,
                                    const float& repeatable) {
+  if (!kEnableHeuristics) return 1.f;
   float score = kWeightDynamic * dynamic + kWeightRepeatable * repeatable;
   return (1.f - score) * kHeuristicImportanceFactor;
 }
