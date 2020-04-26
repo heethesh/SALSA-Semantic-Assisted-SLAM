@@ -468,8 +468,8 @@ void Frame::UndistortKeyPoints() {
 void Frame::ScoreKeyPoints(const cv::Mat &semanticmap, bool enable_removal)
 {
     //Remove Dynamic KeyPoints
-    std::vector<cv::KeyPoint> mvKeysTemp;
-    cv::Mat mDescriptorsTemp;
+    std::vector<cv::KeyPoint> vKeysTemp;
+    cv::Mat DescriptorsTemp;
     int idx_key = 0;
     int enable = 1;
     for(int i=0; i<N; i++)
@@ -479,33 +479,23 @@ void Frame::ScoreKeyPoints(const cv::Mat &semanticmap, bool enable_removal)
         if(int(pixel->z) >250 && enable_removal)
         {
             //  skip += 1;
-            // mvKeysTemp.push_back(mvKeys[0]);
+            // vKeysTemp.push_back(mvKeys[0]);
             // mvScoreDynamic.push_back(0);
             // mvScoreRepeatable.push_back(0);
-            // mDescriptorsTemp.push_back(mDescriptors.row(0));
+            // DescriptorsTemp.push_back(mDescriptors.row(0));
             continue;
         }
-        mvKeysTemp.push_back(mvKeys[i]);
+        vKeysTemp.push_back(mvKeys[i]);
         mvScoreDynamic.push_back(float(pixel->y)/255.0);
         mvScoreRepeatable.push_back(float(pixel->x)/255.0);
-        mDescriptorsTemp.push_back(mDescriptors.row(i));
+        DescriptorsTemp.push_back(mDescriptors.row(i));
     }
     
-    mvKeys = mvKeysTemp;
-    mDescriptors = mDescriptorsTemp;
-    cerr << "UpdatedPoints "<< mvKeysTemp.size()<<":" << N<<endl;
+    mvKeys = vKeysTemp;
+    mDescriptors = DescriptorsTemp;
+    cerr << "UpdatedPoints "<< mvKeys.size()<<":" << N<<endl;
     
-    N = mvKeysTemp.size();
-
-    // mvKeysUn.resize(N);
-    // for(int i=0; i<N; i++)
-    // {
-         
-    //     cv::KeyPoint kp = mvKeys[i];
-    //     kp.pt.x=mat.at<float>(i,0);
-    //     kp.pt.y=mat.at<float>(i,1);
-    //     mvKeysUn[i]=kp;
-    // }
+    N = mvKeys.size();
 }
 
 
