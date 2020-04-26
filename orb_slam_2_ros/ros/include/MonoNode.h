@@ -27,6 +27,9 @@
 #include <chrono>
 
 #include <ros/ros.h>
+#include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
+#include <message_filters/sync_policies/approximate_time.h>
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
@@ -42,10 +45,16 @@ class MonoNode : public Node {
            ros::NodeHandle &node_handle,
            image_transport::ImageTransport &image_transport);
   ~MonoNode();
-  void ImageCallback(const sensor_msgs::ImageConstPtr &msg);
+  void ImageCallback(const sensor_msgs::ImageConstPtr &msg, const sensor_msgs::ImageConstPtr& msgSem);
 
  private:
-  image_transport::Subscriber image_subscriber;
+  // image_transport::Subscriber image_subscriber;
+  typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, 
+                                                          sensor_msgs::Image> 
+      sync_pol;
+  message_filters::Subscriber<sensor_msgs::Image> *image_subscriber;
+  message_filters::Subscriber<sensor_msgs::Image> *semantic_subscriber_;
+  message_filters::Synchronizer<sync_pol> *sync_;
 };
 
 #endif  // ORBSLAM2_ROS_MONONODE_H_
