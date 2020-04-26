@@ -1,0 +1,3 @@
+scripts/*
+detectron2/*
+orb_slam_2_ros/orb_slam2/Thirdparty/*
