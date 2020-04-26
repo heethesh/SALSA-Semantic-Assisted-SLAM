@@ -37,6 +37,7 @@
 
 using namespace std;
 
+
 namespace DBoW2 {
 
 /// @param TDescriptor class of descriptor
@@ -1256,25 +1257,25 @@ void TemplatedVocabulary<TDescriptor,F>::transform(
   bool must = m_scoring_object->mustNormalize(norm);
 
   typename vector<TDescriptor>::const_iterator fit;
-  cout << "HERE1" << endl;
+
   if(m_weighting == TF || m_weighting == TF_IDF)
   {
     unsigned int i_feature = 0;
     int i = 0;
-    cout << "HERE2" << endl;
+
     cout << features.size() << endl;
     cout << mvScoreRepeatable.size() << endl;
     cout << mvScoreDynamic.size() << endl;
     for(fit = features.begin(); fit < features.end(); ++fit, ++i_feature)
     {
-      cout << "HERE3  " << endl;
+
       WordId id;
       NodeId nid;
       WordValue w;
       // w is the idf value if TF_IDF, 1 if TF
       cout << "mvScoreRepeatable[i_feature] " << mvScoreRepeatable[i_feature] << " mvScoreDynamic[i_feature] " << mvScoreDynamic[i_feature] << endl; 
-      if ( (mvScoreRepeatable[i_feature] > 0.9f &&  mvScoreDynamic[i_feature] > 0.9f) 
-        && ((float)rand()/RAND_MAX) > 0.9f)
+      if ( (mvScoreRepeatable[i_feature] > 0.7f &&  mvScoreDynamic[i_feature] > 0.7f) 
+        && ((float)rand()/RAND_MAX) > 0.7f)
       {
         i++;
         continue;

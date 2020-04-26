@@ -433,8 +433,12 @@ bool Frame::PosInGrid(const cv::KeyPoint &kp, int &posX, int &posY) {
 void Frame::ComputeBoW() {
   if (mBowVec.empty()) {
     vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(mDescriptors);
-    //SALSA AYUSH
+  
+    #ifdef SALSA
     mpORBvocabulary->transform(vCurrentDesc, mBowVec, mFeatVec, 4, mvScoreDynamic, mvScoreRepeatable);
+    #else
+      mpORBvocabulary->transform(vCurrentDesc, mBowVec, mFeatVec, 4, mvScoreDynamic);
+    #endif
   }
 }
 
