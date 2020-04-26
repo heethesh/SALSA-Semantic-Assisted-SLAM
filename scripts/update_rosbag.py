@@ -3,7 +3,7 @@
 # @Author: Heethesh Vhavle
 # @Date:   Nov 20, 2019
 # @Last Modified by:   Heethesh Vhavle
-# @Last Modified time: Apr 24, 2020
+# @Last Modified time: Apr 26, 2020
 
 # Python 2/3 compatibility
 from __future__ import print_function, absolute_import, division
@@ -29,23 +29,40 @@ class BagConverter:
         self.bag = rosbag.Bag(args.input_bag)
         self.new_bag = rosbag.Bag(args.output_bag, 'w')
 
-        self.image_topic = '/d400/color/image_raw'
-        self.scores_topic = '/d400/annotation/dynamic_scores'
-        self.topics = [
-            '/d400/accel/imu_info',
-            '/d400/accel/sample',
-            '/d400/aligned_depth_to_color/camera_info',
-            '/d400/aligned_depth_to_color/image_raw',
-            '/d400/color/camera_info',
-            '/d400/color/image_raw',
-            '/d400/depth/camera_info',
-            '/d400/depth/image_raw',
-            '/d400/gyro/imu_info',
-            '/d400/gyro/sample',
-            '/gt',
-            '/odom',
-            '/tf_static',
-        ]
+        if args.dataset == 'open-loris':
+            self.image_topic = '/d400/color/image_raw'
+            self.scores_topic = '/d400/annotation/dynamic_scores'
+            self.topics = [
+                '/d400/accel/imu_info',
+                '/d400/accel/sample',
+                '/d400/aligned_depth_to_color/camera_info',
+                '/d400/aligned_depth_to_color/image_raw',
+                '/d400/color/camera_info',
+                '/d400/color/image_raw',
+                '/d400/depth/camera_info',
+                '/d400/depth/image_raw',
+                '/d400/gyro/imu_info',
+                '/d400/gyro/sample',
+                '/gt',
+                '/odom',
+                '/tf_static',
+            ]
+
+        elif args.dataset == 'tum-rgbd':
+            self.image_topic = '/camera/rgb/image_color'
+            self.scores_topic = '/camera/annotation/dynamic_scores'
+            self.topics = [
+                '/camera/depth/camera_info',
+                '/camera/depth/image',
+                '/camera/rgb/camera_info',
+                '/camera/rgb/image_color',
+                '/cortex_marker_array',
+                '/tf',
+            ]
+
+        else:
+            print('Dataset not supported')
+            sys.exit(1)
 
         self.copy_topics()
 
@@ -99,6 +116,7 @@ if __name__ == '__main__':
     parser.add_argument('--input-bag', help='Input ROS bag.')
     parser.add_argument('--output-bag', help='Input ROS bag.')
     parser.add_argument('--image-dir', help='Annotated images directory.')
+    parser.add_argument('--dataset', help='Options: open-loris | tum-rgbd.')
     args = parser.parse_args()
 
     files = os.listdir(args.image_dir)
