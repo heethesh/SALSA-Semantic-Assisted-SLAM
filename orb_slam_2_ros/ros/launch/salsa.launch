@@ -2,7 +2,7 @@
 <launch>
     <!-- Run ORB-SLAM2 -->
     <include file="$(find orb_slam2_ros)/ros/launch/orb_slam2_d435_mono.launch" />
-    <!-- <include file="$(find orb_slam2_ros)/ros/launch/orb_slam2_d435_rgbd.launch.launch" /> -->
+    <!-- <include file="$(find orb_slam2_ros)/ros/launch/orb_slam2_d435_rgbd.launch" /> -->
 
     <!-- Display camera trajectory -->
     <node
