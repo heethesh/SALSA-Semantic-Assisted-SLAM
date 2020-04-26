@@ -1,3 +1,14 @@
 scripts/*
 detectron2/*
+
+# Third-party libs
 orb_slam_2_ros/orb_slam2/Thirdparty/*
+orb_slam_2_ros/orb_slam2/Thirdparty/DBoW2/*
+orb_slam_2_ros/orb_slam2/Thirdparty/DBoW2/DBoW2/*
+orb_slam_2_ros/orb_slam2/Thirdparty/DBoW2/DUtils/*
+orb_slam_2_ros/orb_slam2/Thirdparty/g2o/*
+orb_slam_2_ros/orb_slam2/Thirdparty/g2o/g2o/*
+orb_slam_2_ros/orb_slam2/Thirdparty/g2o/g2o/core/*
+orb_slam_2_ros/orb_slam2/Thirdparty/g2o/g2o/solvers/*
+orb_slam_2_ros/orb_slam2/Thirdparty/g2o/g2o/stuff/*
+orb_slam_2_ros/orb_slam2/Thirdparty/g2o/g2o/types/*
