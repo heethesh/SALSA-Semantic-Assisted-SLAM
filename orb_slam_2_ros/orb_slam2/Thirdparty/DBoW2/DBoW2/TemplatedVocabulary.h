@@ -26,6 +26,8 @@
 #include <algorithm>
 #include <opencv2/core/core.hpp>
 #include <limits>
+#include <stdlib.h>
+#include <time.h>
 
 #include "FeatureVector.h"
 #include "BowVector.h"
@@ -34,6 +36,12 @@
 #include "../DUtils/Random.h"
 
 using namespace std;
+
+namespace {
+  constexpr float rrThresh = 0.7f;
+  constexpr float repeatThresh = 0.7f;
+  constexpr float dynamicThresh = 0.7f;
+}
 
 namespace DBoW2 {
 
@@ -144,6 +152,20 @@ public:
    */
   virtual void transform(const std::vector<TDescriptor>& features,
     BowVector &v, FeatureVector &fv, int levelsup) const;
+
+  /**
+   * SALSA AYUSH
+   * Transform a set of descriptors into a bow vector and a feature vector
+   * And using the heuristics to determine which descriptors are good for creating bow vector
+   * @param features
+   * @param v (out) bow vector
+   * @param fv (out) feature vector of nodes and feature indexes
+   * @param levelsup levels to go up the vocabulary tree to get the node index
+   */
+  virtual void transform(const std::vector<TDescriptor>& features,
+    BowVector &v, FeatureVector &fv, int levelsup,
+    std::vector<float>& mvScoreDynamic, std::vector<float>&  mvScoreRepeatable) const;
+
 
   /**
    * Transforms a single feature into a word (without weight)
@@ -1215,6 +1237,99 @@ inline double TemplatedVocabulary<TDescriptor,F>::score
   return m_scoring_object->score(v1, v2);
 }
 
+// --------------------------------------------------------------------------
+//--------------------------------------------------------------------------
+//--------------------------------------------------------------------------
+
+//SALSA AYUSH
+template<class TDescriptor, class F>
+void TemplatedVocabulary<TDescriptor,F>::transform(
+  const std::vector<TDescriptor>& features,
+  BowVector &v, FeatureVector &fv, int levelsup,
+  std::vector<float>& mvScoreDynamic, std::vector<float>&  mvScoreRepeatable) const
+{
+  srand(time(NULL));
+  v.clear();
+  fv.clear();
+
+  if(empty()) // safe for subclasses
+  {
+    return;
+  }
+
+  // normalize
+  LNorm norm;
+  bool must = m_scoring_object->mustNormalize(norm);
+
+  typename vector<TDescriptor>::const_iterator fit;
+
+  if(m_weighting == TF || m_weighting == TF_IDF)
+  {
+    unsigned int i_feature = 0;
+    int i = 0;
+
+    cout << features.size() << endl;
+    cout << mvScoreRepeatable.size() << endl;
+    cout << mvScoreDynamic.size() << endl;
+    for(fit = features.begin(); fit < features.end(); ++fit, ++i_feature)
+    {
+
+      WordId id;
+      NodeId nid;
+      WordValue w;
+      // w is the idf value if TF_IDF, 1 if TF
+      // cout << "mvScoreRepeatable[i_feature] " << mvScoreRepeatable[i_feature] << " mvScoreDynamic[i_feature] " << mvScoreDynamic[i_feature] << endl; 
+      if ( (mvScoreRepeatable[i_feature] > repeatThresh &&  mvScoreDynamic[i_feature] > dynamicThresh) 
+        && ((float)rand()/RAND_MAX) > rrThresh)
+      {
+        i++;
+        continue;
+      } 
+
+      transform(*fit, id, w, &nid, levelsup);
+
+      if(w > 0) // not stopped
+      {
+        v.addWeight(id, w);
+        fv.addFeature(nid, i_feature);
+      }
+    }
+    cout << "Dropped : " << i << endl;
+    if(!v.empty() && !must)
+    {
+      // unnecessary when normalizing
+      const double nd = v.size();
+      for(BowVector::iterator vit = v.begin(); vit != v.end(); vit++)
+        vit->second /= nd;
+    }
+
+  }
+  else // IDF || BINARY
+  {
+    unsigned int i_feature = 0;
+    for(fit = features.begin(); fit < features.end(); ++fit, ++i_feature)
+    {
+      WordId id;
+      NodeId nid;
+      WordValue w;
+      // w is idf if IDF, or 1 if BINARY
+
+      cout << "HERE" << endl;
+
+      transform(*fit, id, w, &nid, levelsup);
+
+      if(w > 0) // not stopped
+      {
+        v.addIfNotExist(id, w);
+        fv.addFeature(nid, i_feature);
+      }
+    }
+  } // if m_weighting == ...
+
+  if(must) v.normalize(norm);
+}
+
+//----------------------------------------------------------------------------
 // --------------------------------------------------------------------------
 
 template<class TDescriptor, class F>

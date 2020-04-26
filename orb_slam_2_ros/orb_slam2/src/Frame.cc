@@ -22,6 +22,7 @@
 #include "Converter.h"
 #include "ORBmatcher.h"
 #include <thread>
+#define SALSA_BOW
 #define SALSA
 namespace ORB_SLAM2 {
 
@@ -450,7 +451,12 @@ bool Frame::PosInGrid(const cv::KeyPoint &kp, int &posX, int &posY) {
 void Frame::ComputeBoW() {
   if (mBowVec.empty()) {
     vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(mDescriptors);
-    mpORBvocabulary->transform(vCurrentDesc, mBowVec, mFeatVec, 4);
+  
+    #ifdef SALSA_BOW
+    mpORBvocabulary->transform(vCurrentDesc, mBowVec, mFeatVec, 4, mvScoreDynamic, mvScoreRepeatable);
+    #else
+      mpORBvocabulary->transform(vCurrentDesc, mBowVec, mFeatVec, 4, mvScoreDynamic);
+    #endif
   }
 }
 
