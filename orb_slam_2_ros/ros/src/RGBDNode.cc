@@ -33,13 +33,15 @@ RGBDNode::RGBDNode(const ORB_SLAM2::System::eSensor sensor,
       node_handle, "/camera/rgb/image_raw", 1);
   depth_subscriber_ = new message_filters::Subscriber<sensor_msgs::Image>(
       node_handle, "/camera/depth_registered/image_raw", 1);
-  semantic_subscriber_ = new message_filters::Subscriber<sensor_msgs::Image> (
+  semantic_subscriber_ = new message_filters::Subscriber<sensor_msgs::Image>(
       node_handle, "/d400/annotation/dynamic_scores", 1);
   camera_info_topic_ = "/camera/rgb/camera_info";
 
-  sync_ = new message_filters::Synchronizer<sync_pol> (
-      sync_pol(10), *rgb_subscriber_, *depth_subscriber_, *semantic_subscriber_ );
-  sync_->registerCallback(boost::bind(&RGBDNode::ImageCallback, this, _1, _2, _3));
+  sync_ = new message_filters::Synchronizer<sync_pol>(
+      sync_pol(10), *rgb_subscriber_, *depth_subscriber_,
+      *semantic_subscriber_);
+  sync_->registerCallback(
+      boost::bind(&RGBDNode::ImageCallback, this, _1, _2, _3));
 }
 
 RGBDNode::~RGBDNode() {
@@ -48,8 +50,9 @@ RGBDNode::~RGBDNode() {
   delete sync_;
 }
 
-void RGBDNode::ImageCallback (const sensor_msgs::ImageConstPtr& msgRGB,
-                              const sensor_msgs::ImageConstPtr& msgD, const sensor_msgs::ImageConstPtr& msgSem) {
+void RGBDNode::ImageCallback(const sensor_msgs::ImageConstPtr& msgRGB,
+                             const sensor_msgs::ImageConstPtr& msgD,
+                             const sensor_msgs::ImageConstPtr& msgSem) {
   // Copy the ros image message to cv::Mat.
   cv_bridge::CvImageConstPtr cv_ptrRGB;
   try {
@@ -74,12 +77,11 @@ void RGBDNode::ImageCallback (const sensor_msgs::ImageConstPtr& msgRGB,
     ROS_ERROR("cv_bridge exception: %s", e.what());
     return;
   }
-  
+
   current_frame_time_ = msgRGB->header.stamp;
 
   orb_slam_->TrackRGBD(cv_ptrRGB->image, cv_ptrD->image,
-                       cv_ptrRGB->header.stamp.toSec(), 
-                       cv_ptrSem->image );
+                       cv_ptrRGB->header.stamp.toSec(), cv_ptrSem->image);
 
   Update();
 }

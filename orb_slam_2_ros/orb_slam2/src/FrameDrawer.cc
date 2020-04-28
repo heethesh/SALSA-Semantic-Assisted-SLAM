@@ -84,17 +84,17 @@ cv::Mat FrameDrawer::DrawFrame() {
     const float r = 5;
     const int n = vCurrentKeys.size();
 
-    //OverLay the Semantic Map Here
-    if(im.channels()==1)
-    {
-        cv::cvtColor(im,im,CV_GRAY2RGB);
+    // OverLay the Semantic Map Here
+    if (im.channels() == 1) {
+      cv::cvtColor(im, im, CV_GRAY2RGB);
     }
     float alpha = 0.15;
-    cv::addWeighted( sem, alpha, im, (1.0-alpha), 0.0, im);
-    
+    cv::addWeighted(sem, alpha, im, (1.0 - alpha), 0.0, im);
+
     for (int i = 0; i < n; i++) {
       if (vbVO[i] || vbMap[i]) {
-        const cv::Point3_<uchar>* pixel = &sem.at<cv::Point3_<uchar>>(cvRound(vCurrentKeys[i].pt.y), cvRound(vCurrentKeys[i].pt.x));
+        const cv::Point3_<uchar> *pixel = &sem.at<cv::Point3_<uchar>>(
+            cvRound(vCurrentKeys[i].pt.y), cvRound(vCurrentKeys[i].pt.x));
         cv::Point2f pt1, pt2;
         pt1.x = vCurrentKeys[i].pt.x - r;
         pt1.y = vCurrentKeys[i].pt.y - r;
@@ -103,13 +103,12 @@ cv::Mat FrameDrawer::DrawFrame() {
 
         // This is a match to a MapPoint in the map
         if (vbMap[i]) {
-
           int B_ = int(pixel->x);
           int G_ = int(pixel->y);
           int R_ = 0;
-          if(B_ + G_ < 10){
-              G_ = 255;
-              R_ = 255;
+          if (B_ + G_ < 10) {
+            G_ = 255;
+            R_ = 255;
           }
           cv::rectangle(im, pt1, pt2, cv::Scalar(B_, G_, R_));
           cv::circle(im, vCurrentKeys[i].pt, 2, cv::Scalar(B_, G_, R_), -1);

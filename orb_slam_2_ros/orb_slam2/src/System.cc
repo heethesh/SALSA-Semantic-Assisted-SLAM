@@ -178,7 +178,7 @@ void System::TrackStereo(const cv::Mat &imLeft, const cv::Mat &imRight,
   current_position_ = Tcw;
 }
 void System::TrackRGBD(const cv::Mat &im, const cv::Mat &depthmap,
-                        const double &timestamp, const cv::Mat &semanticmap){
+                       const double &timestamp, const cv::Mat &semanticmap) {
   if (mSensor != RGBD) {
     cerr << "ERROR: you called TrackRGBD but input sensor was not set to RGBD."
          << endl;
@@ -215,8 +215,8 @@ void System::TrackRGBD(const cv::Mat &im, const cv::Mat &depthmap,
     }
   }
 
-  //Send semantic Map here as well
-  cv::Mat Tcw = mpTracker->GrabImageRGBD(im,depthmap,timestamp, semanticmap);
+  // Send semantic Map here as well
+  cv::Mat Tcw = mpTracker->GrabImageRGBD(im, depthmap, timestamp, semanticmap);
 
   unique_lock<mutex> lock2(mMutexState);
   mTrackingState = mpTracker->mState;
@@ -226,7 +226,7 @@ void System::TrackRGBD(const cv::Mat &im, const cv::Mat &depthmap,
 }
 
 void System::TrackMonocular(const cv::Mat &im, const double &timestamp,
-                            const cv::Mat &semanticmap ) {
+                            const cv::Mat &semanticmap) {
   if (mSensor != MONOCULAR) {
     cerr << "ERROR: you called TrackMonocular but input sensor was not set to "
             "Monocular."

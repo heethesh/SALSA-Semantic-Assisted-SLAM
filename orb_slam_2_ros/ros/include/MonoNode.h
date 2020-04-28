@@ -45,12 +45,13 @@ class MonoNode : public Node {
            ros::NodeHandle &node_handle,
            image_transport::ImageTransport &image_transport);
   ~MonoNode();
-  void ImageCallback(const sensor_msgs::ImageConstPtr &msg, const sensor_msgs::ImageConstPtr& msgSem);
+  void ImageCallback(const sensor_msgs::ImageConstPtr &msg,
+                     const sensor_msgs::ImageConstPtr &msgSem);
 
  private:
   // image_transport::Subscriber image_subscriber;
-  typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, 
-                                                          sensor_msgs::Image> 
+  typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image,
+                                                          sensor_msgs::Image>
       sync_pol;
   message_filters::Subscriber<sensor_msgs::Image> *image_subscriber;
   message_filters::Subscriber<sensor_msgs::Image> *semantic_subscriber_;

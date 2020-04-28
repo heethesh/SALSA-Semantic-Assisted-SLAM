@@ -180,8 +180,9 @@ cv::Mat Tracking::GrabImageStereo(const cv::Mat& imRectLeft,
   return mCurrentFrame.mTcw.clone();
 }
 
-cv::Mat Tracking::GrabImageRGBD(const cv::Mat &imRGB, const cv::Mat &imD, 
-                                const double &timestamp, const cv::Mat &semanticmap){
+cv::Mat Tracking::GrabImageRGBD(const cv::Mat& imRGB, const cv::Mat& imD,
+                                const double& timestamp,
+                                const cv::Mat& semanticmap) {
   mImGray = imRGB;
   mIm_sem = semanticmap;
   cv::Mat imDepth = imD;
@@ -201,16 +202,17 @@ cv::Mat Tracking::GrabImageRGBD(const cv::Mat &imRGB, const cv::Mat &imD,
   if ((fabs(mDepthMapFactor - 1.0f) > 1e-5) || imDepth.type() != CV_32F)
     imDepth.convertTo(imDepth, CV_32F, mDepthMapFactor);
 
-  mCurrentFrame = Frame(mImGray, imDepth, timestamp, mpORBextractorLeft, 
-                        mpORBVocabulary,mK,mDistCoef,mbf,mThDepth, semanticmap);
+  mCurrentFrame =
+      Frame(mImGray, imDepth, timestamp, mpORBextractorLeft, mpORBVocabulary,
+            mK, mDistCoef, mbf, mThDepth, semanticmap);
 
   Track();
 
   return mCurrentFrame.mTcw.clone();
 }
 
-cv::Mat Tracking::GrabImageMonocular(const cv::Mat& im,
-                                     const double& timestamp, const cv::Mat &semanticmap) {
+cv::Mat Tracking::GrabImageMonocular(const cv::Mat& im, const double& timestamp,
+                                     const cv::Mat& semanticmap) {
   mImGray = im;
   mIm_sem = semanticmap;
   bool is_map_init = !((mState == NOT_INITIALIZED || mState == NO_IMAGES_YET));
@@ -227,11 +229,13 @@ cv::Mat Tracking::GrabImageMonocular(const cv::Mat& im,
   }
 
   if (mState == NOT_INITIALIZED || mState == NO_IMAGES_YET)
-    mCurrentFrame = Frame(mImGray, timestamp, mpIniORBextractor,
-                          mpORBVocabulary, mK, mDistCoef, mbf, mThDepth, semanticmap, is_map_init);
+    mCurrentFrame =
+        Frame(mImGray, timestamp, mpIniORBextractor, mpORBVocabulary, mK,
+              mDistCoef, mbf, mThDepth, semanticmap, is_map_init);
   else
-    mCurrentFrame = Frame(mImGray, timestamp, mpORBextractorLeft,
-                          mpORBVocabulary, mK, mDistCoef, mbf, mThDepth, semanticmap, is_map_init);
+    mCurrentFrame =
+        Frame(mImGray, timestamp, mpORBextractorLeft, mpORBVocabulary, mK,
+              mDistCoef, mbf, mThDepth, semanticmap, is_map_init);
 
   Track();
 
@@ -271,10 +275,10 @@ void Tracking::Track() {
         CheckReplacedInLastFrame();
 
         if (mVelocity.empty() || mCurrentFrame.mnId < mnLastRelocFrameId + 2) {
-            // cerr<<"H1";
+          // cerr<<"H1";
           bOK = TrackReferenceKeyFrame();
         } else {
-            // cerr<<"H2";
+          // cerr<<"H2";
           bOK = TrackWithMotionModel();
           if (!bOK) bOK = TrackReferenceKeyFrame();
         }
@@ -344,7 +348,7 @@ void Tracking::Track() {
     // the local map.
     if (!mbOnlyTracking) {
       if (bOK) bOK = TrackLocalMap();
-    //   cerr<<"Bok:"<<bOK<<endl;
+      //   cerr<<"Bok:"<<bOK<<endl;
     } else {
       // mbVO true means that there are few matches to MapPoints in the map. We
       // cannot retrieve a local map and therefore we do not perform
@@ -820,7 +824,7 @@ bool Tracking::TrackWithMotionModel() {
   return nmatchesMap >= 10;
 }
 
-//Front end biasing here
+// Front end biasing here
 bool Tracking::TrackLocalMap() {
   // We have an estimation of the camera pose and some map points tracked in the
   // frame. We retrieve the local map and try to find matches to points in the
@@ -849,7 +853,7 @@ bool Tracking::TrackLocalMap() {
     }
   }
 
-    // cerr<<"Inlier :"<<mnMatchesInliers<<endl;
+  // cerr<<"Inlier :"<<mnMatchesInliers<<endl;
   // Decide if the tracking was succesful
   // More restrictive if there was a relocalization recently
   if (mCurrentFrame.mnId < mnLastRelocFrameId + mMaxFrames &&

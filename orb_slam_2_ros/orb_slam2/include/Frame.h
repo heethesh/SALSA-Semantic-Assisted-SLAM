@@ -54,13 +54,15 @@ class Frame {
 
   // Constructor for RGB-D cameras.
   Frame(const cv::Mat &imGray, const cv::Mat &imDepth, const double &timeStamp,
-         ORBextractor* extractor,ORBVocabulary* voc, cv::Mat &K, cv::Mat &distCoef,
-          const float &bf, const float &thDepth, const cv::Mat &semanticmap);
+        ORBextractor *extractor, ORBVocabulary *voc, cv::Mat &K,
+        cv::Mat &distCoef, const float &bf, const float &thDepth,
+        const cv::Mat &semanticmap);
 
   // Constructor for Monocular cameras.
   Frame(const cv::Mat &imGray, const double &timeStamp, ORBextractor *extractor,
         ORBVocabulary *voc, cv::Mat &K, cv::Mat &distCoef, const float &bf,
-        const float &thDepth, const cv::Mat &semanticmap, const bool enable_removal);
+        const float &thDepth, const cv::Mat &semanticmap,
+        const bool enable_removal);
 
   // Extract ORB on the image. 0 for left image and 1 for right image.
   void ExtractORB(int flag, const cv::Mat &im);
@@ -207,7 +209,7 @@ class Frame {
   // (called in the constructor).
   void UndistortKeyPoints();
 
-  // Ass heuristic Scores 
+  // Ass heuristic Scores
   void ScoreKeyPoints(const cv::Mat &semanticmap, bool enable_removal);
 
   // Computes image bounds for the undistorted image (called in the

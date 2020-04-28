@@ -45,14 +45,13 @@ class RGBDNode : public Node {
            ros::NodeHandle &node_handle,
            image_transport::ImageTransport &image_transport);
   ~RGBDNode();
-  void ImageCallback(const sensor_msgs::ImageConstPtr& msgRGB,
-                     const sensor_msgs::ImageConstPtr& msgD,
-                     const sensor_msgs::ImageConstPtr& msgSem);
+  void ImageCallback(const sensor_msgs::ImageConstPtr &msgRGB,
+                     const sensor_msgs::ImageConstPtr &msgD,
+                     const sensor_msgs::ImageConstPtr &msgSem);
 
  private:
-  typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image,
-                                                          sensor_msgs::Image, 
-                                                          sensor_msgs::Image> 
+  typedef message_filters::sync_policies::ApproximateTime<
+      sensor_msgs::Image, sensor_msgs::Image, sensor_msgs::Image>
       sync_pol;
   message_filters::Subscriber<sensor_msgs::Image> *rgb_subscriber_;
   message_filters::Subscriber<sensor_msgs::Image> *depth_subscriber_;
