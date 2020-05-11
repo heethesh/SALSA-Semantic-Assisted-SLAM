@@ -9,6 +9,7 @@ We propose a learning augmented lifelong SLAM method for indoor environments. Mo
 <img src="docs/scores-table.jpg?raw=true" width="450">
 All 80 classes from the COCO dataset are assigned scores. This list is only a subset of some interesting objects. Some objects are exclusively labelled as dynamic objects.
 
+&nbsp;  
 &nbsp;
 <img src="docs/scoremaps.jpg?raw=true" width="500">
 
