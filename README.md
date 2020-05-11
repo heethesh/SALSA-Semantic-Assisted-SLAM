@@ -7,9 +7,11 @@
 We propose a learning augmented lifelong SLAM method for indoor environments. Most of the existing SLAM methods assume a static environment and disregard dynamic objects. Another problem is that most feature and semantic based SLAM methods fail in repetitive environments. The unexpected changes of surroundings corrupts the quality of the tracking and leads to system failure. This project aims to use learning methods to classify landmarks and objects as dynamic and/or repeatable in nature to better handle optimization, achieve robust performance in a changing environment, and to re-localize in a lifelong-setting. We propose using semantic information and assigning scores to object feature points based on their probability to be dynamic and/or repeatable. We update the front-end, optimization cost functions, and BOW feature generation for loop closures from the original [ORB-SLAM2 pipeline](https://github.com/appliedAI-Initiative/orb_slam_2_ros). Please see [our paper](docs/report.pdf) for more details.
 
 <img src="docs/scores-table.jpg?raw=true" width="450">
-All 80 classes from the COCO dataset are assigned scores. This list is only a subset of some interesting objects. Some objects are exclusively labelled as dynamic objects.  
-<br>
+All 80 classes from the COCO dataset are assigned scores. This list is only a subset of some interesting objects. Some objects are exclusively labelled as dynamic objects.
+
+&nbsp;
 <img src="docs/scoremaps.jpg?raw=true" width="500">
+
 Mask-RCNN was used to segment object instances and the scores were mapped according to the scale shown on the right. The left column shows score maps for the OpenLORIS-Scene [3] cafe1-2 sequence and the right column shows the score maps for TUM-RGBD  walking_static sequence.
 
 ## Usage
