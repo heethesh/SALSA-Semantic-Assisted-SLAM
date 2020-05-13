@@ -16,7 +16,7 @@ All 80 classes from the COCO dataset are assigned scores. This list is only a su
 Mask-RCNN was used to segment object instances and the scores were mapped according to the scale shown on the right. The left column shows score maps for the OpenLORIS-Scene [3] cafe1-2 sequence and the right column shows the score maps for TUM-RGBD  walking_static sequence.
 
 ## Usage
-Follow the setup procedure [here](https://github.com/appliedAI-Initiative/orb_slam_2_ros#2-building-orb_slam2_ros).
+Follow the setup procedure [here](https://github.com/appliedAI-Initiative/orb_slam_2_ros#2-building-orb_slam2_ros). The segmented scoremaps are pre-computed (using `detectron2/demo/segment.sh`) and appended into the ROS bag files (using `scripts/update_rosbag.py`).
 
 ```
 catkin build
@@ -55,5 +55,7 @@ Dynamic feature points in the red mask region are removed. Possibly dynamic and 
 
 ## References
 [1] R. Mur-Artal and J. D. Tardos, "Orb-slam2: An open-source slam" system for monocular, stereo, and rgb-d cameras,” IEEE Transactions on Robotics, vol. 33, no. 5, pp. 1255–1262, 2017.  
+
 [2] C. Yu, Z. Liu, X. Liu, F. Xie, Y. Yang, Q. Wei, and Q. Fei, "Dsslam: A semantic visual slam towards dynamic environments," in 2018 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), 2018, pp. 1168–1174.  
-[3] X. Shi, D. Li, P. Zhao, Q. Tian, Y. Tian, Q. Long, C. Zhu, J. Song, F. Qiao, L. Song, Y. Guo, Z. Wang, Y. Zhang, B. Qin, W. Yang, F. Wang, R. H. M. Chan, and Q. She, "Are we ready for service robots? the openloris-scene datasets for lifelong slam," 2019. [Dataset Link](https://lifelong-robotic-vision.github.io/dataset/scene)
+
+3] X. Shi, D. Li, P. Zhao, Q. Tian, Y. Tian, Q. Long, C. Zhu, J. Song, F. Qiao, L. Song, Y. Guo, Z. Wang, Y. Zhang, B. Qin, W. Yang, F. Wang, R. H. M. Chan, and Q. She, "Are we ready for service robots? the openloris-scene datasets for lifelong slam," 2019. [Dataset Link](https://lifelong-robotic-vision.github.io/dataset/scene)
