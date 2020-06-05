@@ -12,13 +12,13 @@ python bag_to_images.py BAG_FILE OUTPUT_DIR IMAGE_TOPIC
 
 ## Generating Score Maps
 
-Here, we will segment the objects and compute the scoremaps (see the [report](docs/report.pdf) for more details). Make sure you clone the `detectron2` submodule too which is in this repository and follow the installation procedure [here](https://github.com/heethesh/detectron2/blob/8e67751ccc666ef3f5845222b707d37365a6ec19/INSTALL.md).
+Here, we will segment the objects and compute the scoremaps (see the [report](../docs/report.pdf) for more details). Make sure you clone the `detectron2` submodule too which is in this repository and follow the installation procedure [here](https://github.com/heethesh/detectron2/blob/8e67751ccc666ef3f5845222b707d37365a6ec19/INSTALL.md).
 
 ```
 git submodule update --init --recursive
 ```
 
-As mentioned in the report, we manually assign scores for each of the classes of objects (COCO here). An example scores file is shown [here](data/scores.tsv). The columns represent scores for dynamic, possibly dynamic, and repeatable categories. The row order of class labels is the same as the COCO 2014/2017 release (see [this file](https://github.com/amikelive/coco-labels/blob/master/coco-labels-2014_2017.txt) for the order).
+As mentioned in the report, we manually assign scores for each of the classes of objects (COCO here). An example scores file is shown [here](../data/scores.tsv). The columns represent scores for dynamic, possibly dynamic, and repeatable categories. The row order of class labels is the same as the COCO 2014/2017 release (see [this file](https://github.com/amikelive/coco-labels/blob/master/coco-labels-2014_2017.txt) for the order).
 
 Use the [`segment.sh`](https://github.com/heethesh/detectron2/blob/8e67751ccc666ef3f5845222b707d37365a6ec19/demo/segment.sh) script to run the segmentation. Specify the extracted images, output folder, and the scores files path. This script also lets you change the dataset, network, and weights to use another segmentation algorithm.
 
@@ -52,7 +52,7 @@ The backend optimization changes can be disabled and the optimizer weights (as d
 
 ## Evaluation
 
-You may use the [export_pose.py](scripts/export_pose.py) script to export the current camera poses to file and use TUM-RGBDs trajectory evaluation tools. This script is a ROS node and hit `Ctrl+C` to shutdown the node and the poses file is generated at `/tmp`.
+You may use the [export_pose.py](../scripts/export_pose.py) script to export the current camera poses to file and use TUM-RGBDs trajectory evaluation tools. This script is a ROS node and hit `Ctrl+C` to shutdown the node and the poses file is generated at `/tmp`.
 
 ```
 rosrun export_poses.py
