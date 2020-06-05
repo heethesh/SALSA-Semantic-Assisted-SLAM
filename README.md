@@ -23,6 +23,8 @@ catkin build
 roslaunch orb_slam_2_ros salsa.launch
 ```
 
+Please see our report for the changes that we have made in the pipeline. We have tested on monocular camera data, RGB-D camera is still experimental and might work. Stereo mode is supported in the back-end optimization but the front-end (feature culling and ROS node integration) is not fully supported yet.
+
 ## Results
 
 #### RMSE Absolute Trajectory Error (ATE) on TUM-RGBD Dataset
@@ -52,6 +54,20 @@ OpenLORIS-Scene Sequences: [YouTube Link](https://youtu.be/9ku1nIotTUw).
 <br>
 <img src="docs/tracking.png?raw=true">
 Dynamic feature points in the red mask region are removed. Possibly dynamic and repeatable feature points have a shade a green/blue and rest of the static object features points are labelled in yellow.
+
+## Citation
+
+Please cite [our work](docs/report.pdf) if you use SALSA.
+
+```
+@unpublished{SALSA2020,
+    author    = {Ayush Jhalani and Heethesh Vhavle and Sachit Mahajan},
+    title     = {{SALSA}: Semantic Assisted Life-Long {SLAM} for Indoor Environments},
+    note      = {16-833 Robot Localization and Mapping (Spring 2020) Final Project at Carnegie Mellon University},
+    month     = "May",
+    year      = "2020"
+}
+```
 
 ## References
 [1] R. Mur-Artal and J. D. Tardos, "Orb-slam2: An open-source slam" system for monocular, stereo, and rgb-d cameras,” IEEE Transactions on Robotics, vol. 33, no. 5, pp. 1255–1262, 2017.  
