@@ -15,8 +15,8 @@ All 80 classes from the COCO dataset are assigned scores. This list is only a su
 
 Mask-RCNN was used to segment object instances and the scores were mapped according to the scale shown on the right. The left column shows score maps for the OpenLORIS-Scene [3] cafe1-2 sequence and the right column shows the score maps for TUM-RGBD  walking_static sequence.
 
-## Usage
-Follow the setup procedure [here](https://github.com/appliedAI-Initiative/orb_slam_2_ros#2-building-orb_slam2_ros). The segmented scoremaps are pre-computed (using `detectron2/demo/segment.sh`) and appended into the ROS bag files (using `scripts/update_rosbag.py`).
+## Setup and Usage
+The current version does not perform segmentation online, the score maps are pre-computed using Detectron 2's Mask RCNN network and appended into the ROS bag file (using `scripts/update_rosbag.py`). See [USAGE.md](docs/USAGE.md) for more details on setting up and running this pipeline.
 
 ```
 catkin build
