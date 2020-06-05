@@ -38,6 +38,8 @@ You should now be able to playback the ROS bag and visualize the synchronized sc
 
 ## Launch SALSA
 
+Follow the setup procedure [here](https://github.com/appliedAI-Initiative/orb_slam_2_ros#2-building-orb_slam2_ros) to install ORB-SLAM dependencies.
+
 Now, we are ready to run the ORB-SLAM pipeline. Please see our report for the changes that we have made in the pipeline. We have tested on monocular camera data, RGB-D camera is still experimental and might work. Stereo mode is supported in the back-end optimization but the front-end (feature culling and ROS node integration) is not fully supported yet. We have already updated the camera parameters and topic names for D435 (for OpenLORIS-Scene) and TUM-RGBD [here](https://github.com/heethesh/SALSA-Semantic-Assisted-SLAM/tree/master/orb_slam_2_ros/ros/launch).
 
 ```
